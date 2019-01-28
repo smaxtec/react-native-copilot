@@ -80,8 +80,14 @@ const copilot = ({
         await this.setState({ currentStep: step });
         this.eventEmitter.emit('stepChange', step);
 
-        if (move) {
-          this.moveToCurrentStep();
+        if (this.stepChangeInterceptor) {
+            this.stepChangeInterceptor(step).then(() => {
+              if (move) {
+                this.moveToCurrentStep();
+              }
+            });
+        } else if (move) {
+            this.moveToCurrentStep();
         }
       }
 
@@ -156,6 +162,10 @@ const copilot = ({
         this.eventEmitter.emit('stop');
       }
 
+      setStepChangeInterceptor = (callback) => {
+        this.stepChangeInterceptor = callback;
+      };
+
       async moveToCurrentStep(): void {
         const size = await this.state.currentStep.target.measure();
 
@@ -176,6 +186,7 @@ const copilot = ({
               currentStep={this.state.currentStep}
               visible={this.state.visible}
               copilotEvents={this.eventEmitter}
+              setStepChangeInterceptor={this.setStepChangeInterceptor}
             />
             <CopilotModal
               next={this.next}
