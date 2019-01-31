@@ -112,6 +112,10 @@ class CopilotModal extends Component<Props, State> {
       }
     }
 
+    if (this.props.currentStep.addHeight) {
+      obj.height += this.props.currentStep.addHeight;
+    }
+
     const center = {
       x: obj.left + (obj.width / 2),
       y: obj.top + (obj.height / 2),

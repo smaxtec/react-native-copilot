@@ -7,6 +7,7 @@ type Props = {
   name: string,
   text: string,
   order: number,
+  addHeight: number,
   active?: boolean,
   _copilot: CopilotContext,
   children: React$Element
@@ -46,6 +47,7 @@ class ConnectedCopilotStep extends Component<Props> {
       name: this.props.name,
       text: this.props.text,
       order: this.props.order,
+      addHeight: this.props.addHeight,
       target: this,
       wrapper: this.wrapper,
     });
