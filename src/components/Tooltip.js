@@ -44,6 +44,8 @@ const Tooltip = ({
           <Button>{translations ? translations[1] : 'Previous'}</Button>
         </TouchableOpacity>
       ) : null}
+    </View>
+    <View style={[styles.bottomBar]}>
       {!isLastStep ? (
         <TouchableOpacity onPress={handleNext}>
           <Button>{translations ? translations[2] : 'Next'}</Button>

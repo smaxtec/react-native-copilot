@@ -42,7 +42,6 @@ const copilot = ({
   androidStatusBarVisible,
   backdropColor,
   verticalOffset = 0,
-  translations,
 } = {}) => (WrappedComponent) => {
   class Copilot extends Component<any, State> {
     state = {
@@ -179,6 +178,10 @@ const copilot = ({
       this.stepTimeout = milliseconds;
     };
 
+    setTranslations = (translations: Array) => {
+      this.translations = translations;
+    };
+
     async moveToCurrentStep(): void {
       if (this.state.currentStep === null) {
         this.stop();
@@ -205,6 +208,7 @@ const copilot = ({
             copilotEvents={this.eventEmitter}
             setStepChangeInterceptor={this.setStepChangeInterceptor}
             setStepTimeout={this.setStepTimeout}
+            setTranslations={this.setTranslations}
           />
           <CopilotModal
             next={this.next}
@@ -221,7 +225,7 @@ const copilot = ({
             animated={animated}
             androidStatusBarVisible={androidStatusBarVisible}
             backdropColor={backdropColor}
-            translations={translations}
+            translations={this.translations}
             ref={(modal) => {
               this.modal = modal;
             }}
