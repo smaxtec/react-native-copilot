@@ -30,9 +30,7 @@ export default StyleSheet.create({
     borderRadius: 3,
     overflow: 'hidden',
   },
-  tooltipText: {
-
-  },
+  tooltipText: {},
   tooltipContainer: {
     flex: 1,
   },
@@ -64,7 +62,6 @@ export default StyleSheet.create({
     color: '#27ae60',
   },
   bottomBar: {
-    marginTop: 10,
     flexDirection: 'row',
     justifyContent: 'flex-end',
   },
