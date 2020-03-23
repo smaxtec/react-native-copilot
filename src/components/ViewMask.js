@@ -18,6 +18,7 @@ type Props = {
   animationDuration: number,
   animated: boolean,
   backdropColor: string,
+  onClick?: () => void,
 };
 
 type State = {
@@ -32,9 +33,9 @@ class ViewMask extends Component<Props, State> {
     position: new Animated.ValueXY({ x: 0, y: 0 }),
   };
 
-  componentWillReceiveProps(nextProps) {
-    if (this.props.position !== nextProps.position || this.props.size !== nextProps.size) {
-      this.animate(nextProps.size, nextProps.position);
+  componentDidUpdate(prevProps) {
+    if (prevProps.position !== this.props.position || prevProps.size !== this.props.size) {
+      this.animate(this.props.size, this.props.position);
     }
   }
 
@@ -74,7 +75,7 @@ class ViewMask extends Component<Props, State> {
     );
 
     return (
-      <View style={this.props.style}>
+      <View style={this.props.style} onStartShouldSetResponder={this.props.onClick}>
         <Animated.View
           style={[
             styles.overlayRectangle,

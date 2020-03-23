@@ -16,6 +16,7 @@ type Props = {
   handleStop: func,
   currentStep: Step,
   translations: Array,
+  labels: Object,
 };
 
 const Tooltip = ({
@@ -26,6 +27,7 @@ const Tooltip = ({
   handleStop,
   currentStep,
   translations,
+  labels,
 }: Props) => (
   <View>
     <View style={styles.tooltipContainer}>
@@ -34,27 +36,29 @@ const Tooltip = ({
       </Text>
     </View>
     <View style={[styles.bottomBar]}>
-      {!isLastStep ? (
-        <TouchableOpacity onPress={handleStop}>
-          <Button>{translations ? translations[0] : 'Skip'}</Button>
-        </TouchableOpacity>
-      ) : null}
-      {!isFirstStep ? (
-        <TouchableOpacity onPress={handlePrev}>
-          <Button>{translations ? translations[1] : 'Previous'}</Button>
-        </TouchableOpacity>
-      ) : null}
-    </View>
-    <View style={[styles.bottomBar]}>
-      {!isLastStep ? (
-        <TouchableOpacity onPress={handleNext}>
-          <Button>{translations ? translations[2] : 'Next'}</Button>
-        </TouchableOpacity>
-      ) : (
-        <TouchableOpacity onPress={handleStop}>
-          <Button>{translations ? translations[3] : 'Finish'}</Button>
-        </TouchableOpacity>
-      )}
+      {
+        !isLastStep ?
+          <TouchableOpacity onPress={handleStop}>
+            <Button>{translations ? translations[0] : labels ? labels.skip : 'Skip'}</Button>
+          </TouchableOpacity>
+          : null
+      }
+      {
+        !isFirstStep ?
+          <TouchableOpacity onPress={handlePrev}>
+            <Button>{translations ? translations[1] : labels ? labels.previous : 'Previous'}</Button>
+          </TouchableOpacity>
+          : null
+      }
+      {
+        !isLastStep ?
+          <TouchableOpacity onPress={handleNext}>
+            <Button>{translations ? translations[2] : labels ? labels.next : 'Next'}</Button>
+          </TouchableOpacity> :
+          <TouchableOpacity onPress={handleStop}>
+            <Button>{translations ? translations[3] : labels ? labels.finish : 'Finish'}</Button>
+          </TouchableOpacity>
+      }
     </View>
   </View>
 );
