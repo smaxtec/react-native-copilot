@@ -2,7 +2,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
-import { View } from 'react-native';
+import { findNodeHandle, View } from 'react-native';
 
 import mitt from 'mitt';
 import hoistStatics from 'hoist-non-react-statics';
@@ -32,23 +32,33 @@ type State = {
   visible: boolean,
   androidStatusBarVisible: boolean,
   backdropColor: string,
+  scrollView?: React.RefObject,
+  stopOnOutsideClick?: boolean,
 };
 
 const copilot = ({
   overlay,
   tooltipComponent,
+  tooltipStyle,
   stepNumberComponent,
   animated,
+  labels,
   androidStatusBarVisible,
   backdropColor,
+  stopOnOutsideClick = false,
+  svgMaskPath,
   verticalOffset = 0,
-} = {}) => (WrappedComponent) => {
-  class Copilot extends Component<any, State> {
-    state = {
-      steps: {},
-      currentStep: null,
-      visible: false,
-    };
+  wrapperStyle,
+  translations,
+} = {}) =>
+  (WrappedComponent) => {
+    class Copilot extends Component<any, State> {
+      state = {
+        steps: {},
+        currentStep: null,
+        visible: false,
+        scrollView: null,
+      };
 
     getChildContext(): { _copilot: CopilotContext } {
       return {
@@ -97,6 +107,26 @@ const copilot = ({
         setTimeout(() => {
           this.moveToCurrentStep();
         }, this.stepTimeout ? this.stepTimeout : 0);
+
+
+        if (this.state.scrollView) {
+          const { scrollView } = this.state;
+          await this.state.currentStep.wrapper.measureLayout(
+            findNodeHandle(scrollView), (x, y, w, h) => {
+              const yOffsett = y > 0 ? y - (h / 2) : 0;
+              scrollView.scrollTo({ y: yOffsett, animated: false });
+            });
+        }
+        if (this.stepChangeInterceptor) {
+          this.stepChangeInterceptor(step).then(() => {
+              setTimeout(() => {
+                if (move) {
+                  this.moveToCurrentStep();
+                  this.state.scrollView ? 100 : 0;
+                }
+              }, this.stepTimeout ? this.stepTimeout : 0);
+          });
+        }
       }
     };
 
@@ -143,27 +173,33 @@ const copilot = ({
       await this.setCurrentStep(this.getPrevStep());
     };
 
-    start = async (fromStep?: string): void => {
-      const { steps } = this.state;
+      start = async (fromStep?: string, scrollView?: React.RefObject): void => {
+        const { steps } = this.state;
 
-      const currentStep = fromStep ? steps[fromStep] : this.getFirstStep();
+        if (!this.state.scrollView) {
+          this.setState({ scrollView });
+        }
 
-      if (this.startTries > MAX_START_TRIES) {
-        this.startTries = 0;
-        return;
-      }
+        const currentStep = fromStep
+          ? steps[fromStep]
+          : this.getFirstStep();
 
-      if (!currentStep) {
-        this.startTries += 1;
-        requestAnimationFrame(() => this.start(fromStep));
-      } else {
-        this.eventEmitter.emit('start');
-        await this.setCurrentStep(currentStep);
-        await this.moveToCurrentStep();
-        await this.setVisibility(true);
-        this.startTries = 0;
-      }
-    };
+        if (this.startTries > MAX_START_TRIES) {
+          this.startTries = 0;
+          return;
+        }
+
+        if (!currentStep) {
+          this.startTries += 1;
+          requestAnimationFrame(() => this.start(fromStep));
+        } else {
+          this.eventEmitter.emit('start');
+          await this.setCurrentStep(currentStep);
+          await this.moveToCurrentStep();
+          await this.setVisibility(true);
+          this.startTries = 0;
+        }
+      };
 
     stop = async (): void => {
       await this.setVisibility(false);
@@ -182,7 +218,7 @@ const copilot = ({
       this.translations = translations;
     };
 
-    async moveToCurrentStep(): void {
+    moveToCurrentStep = async () => {
       if (this.state.currentStep === null) {
         this.stop();
         this.start();
@@ -195,7 +231,7 @@ const copilot = ({
         left: size.x - OFFSET_WIDTH / 2,
         top: size.y - OFFSET_WIDTH / 2 + verticalOffset,
       });
-    }
+    };
 
     render() {
       return (
@@ -219,12 +255,16 @@ const copilot = ({
             isLastStep={this.isLastStep()}
             currentStepNumber={this.getStepNumber()}
             currentStep={this.state.currentStep}
+            labels={labels}
             stepNumberComponent={stepNumberComponent}
             tooltipComponent={tooltipComponent}
+            tooltipStyle={tooltipStyle}
             overlay={overlay}
             animated={animated}
             androidStatusBarVisible={androidStatusBarVisible}
             backdropColor={backdropColor}
+            svgMaskPath={svgMaskPath}
+            stopOnOutsideClick={stopOnOutsideClick}
             translations={this.translations}
             ref={(modal) => {
               this.modal = modal;

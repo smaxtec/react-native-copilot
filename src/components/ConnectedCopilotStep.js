@@ -24,9 +24,9 @@ class ConnectedCopilotStep extends Component<Props> {
     }
   }
 
-  componentWillReceiveProps(nextProps) {
-    if (nextProps.active !== this.props.active) {
-      if (nextProps.active) {
+  componentDidUpdate(prevProps) {
+    if (this.props.active !== prevProps.active) {
+      if (this.props.active) {
         this.register();
       } else {
         this.unregister();
@@ -72,21 +72,15 @@ class ConnectedCopilotStep extends Component<Props> {
     return new Promise((resolve, reject) => {
       const measure = () => {
         // Wait until the wrapper element appears
-        if (this.wrapper !== null) {
-          if (this.wrapper.measure) {
-            this.wrapper.measure(
-              (ox, oy, width, height, x, y) =>
-                resolve({
-                  x,
-                  y,
-                  width,
-                  height,
-                }),
-              reject,
-            );
-          } else {
-            requestAnimationFrame(measure);
-          }
+        if (this.wrapper && this.wrapper.measure) {
+          this.wrapper.measure(
+            (ox, oy, width, height, x, y) => resolve({
+              x, y, width, height,
+            }),
+            reject,
+          );
+        } else {
+          requestAnimationFrame(measure);
         }
       };
 
